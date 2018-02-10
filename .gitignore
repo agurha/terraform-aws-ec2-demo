@@ -2,3 +2,6 @@
 terraform.tfstate
 *.tfstate*
 terraform.tfvars
+.DS_Store
+*.DS_Store*
+

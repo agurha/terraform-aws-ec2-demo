@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "eu-west-1"
+  region = "us-east-1"
 }
 
 data "aws_vpc" "default" {
@@ -33,7 +33,7 @@ data "aws_ami" "amazon_linux" {
 module "security_group" {
   source = "terraform-aws-modules/security-group/aws"
 
-  name        = "example"
+  name        = "ec2-us-east1"
   description = "Security group for example usage with EC2 instance"
   vpc_id      = "${data.aws_vpc.default.id}"
 
@@ -43,12 +43,19 @@ module "security_group" {
 }
 
 module "ec2" {
-  source = "../../"
+  source = "terraform-aws-modules/ec2-instance/aws"
 
-  name                        = "example"
-  ami                         = "${data.aws_ami.amazon_linux.id}"
-  instance_type               = "t2.micro"
-  subnet_id                   = "${element(data.aws_subnet_ids.all.ids, 0)}"
-  vpc_security_group_ids      = ["${module.security_group.this_security_group_id}"]
-  associate_public_ip_address = true
+  name  = "my-cluster"
+  count = 5
+  
+  ami                    = "${data.aws_ami.amazon_linux.id}"
+  instance_type          = "t2.micro"
+  subnet_id                    = "${element(data.aws_subnet_ids.all.ids, 0)}"
+  vpc_security_group_ids        = ["${module.security_group.this_security_group_id}"]
+  associate_public_ip_address   = true
+  tags = {
+    Terraform = "true"
+    Environment = "dev"
+  }
 }
+
